@@ -7,3 +7,11 @@ def insert(conn, kind, payload, result, room_id=None):
     conn.commit(); return int(cur.lastrowid)
 def list_recent(conn, limit=50):
     return [dict(r) for r in conn.execute("SELECT * FROM calc_runs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()]
+def get(conn, rid):
+    row = conn.execute("SELECT * FROM calc_runs WHERE id=?", (rid,)).fetchone()
+    if not row: return None
+    d = dict(row)
+    # 钉选的输入与结果随记录原样返回，设置默认值随后变化不影响这里的两侧升数。
+    d["input"] = json.loads(d.pop("input_json"))
+    d["result"] = json.loads(d.pop("result_json"))
+    return d
